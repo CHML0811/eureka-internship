@@ -1,0 +1,5 @@
+fixture: form_like_2
+document_type: form_like
+entities:
+  - {entity_id: e1, type: address, name: "18 Harbour Road"}
+relationships: []

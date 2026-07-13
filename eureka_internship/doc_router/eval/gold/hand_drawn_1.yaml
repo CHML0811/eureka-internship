@@ -1,0 +1,7 @@
+fixture: hand_drawn_1
+document_type: hand_drawn
+entities:
+  - {entity_id: e1, type: person, name: "Sam Ho"}
+  - {entity_id: e2, type: company, name: "Orchid Corp"}
+relationships:
+  - {relationship_id: r1, src: e1, dst: e2, kind: UBO_OF}

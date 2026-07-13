@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "name": "project-9-literal-benchmark",
+    "version": 2,
+    "note": "Gold queries are parameterized integration targets, not real-model accuracy claims."
+  },
+  "questions": [
+    {
+      "id": "ceo-lookup",
+      "question": "Who is the CEO of Company X?",
+      "gold_cypher": "MATCH (p:Person)-[:DIRECTOR_OF]->(c:Company {name:$company}) WHERE p.role=$role RETURN p.name AS ceo LIMIT $limit",
+      "parameters": {"company": "Company X", "role": "CEO", "limit": 20},
+      "expected_answer": "Person A is the CEO of Company X."
+    },
+    {
+      "id": "direct-ownership",
+      "question": "What companies does Person A directly own?",
+      "gold_cypher": "MATCH (p:Person {name:$person})-[r:OWNS]->(c:Company) RETURN c.name AS company, r.percent AS percent LIMIT $limit",
+      "parameters": {"person": "Person A", "limit": 50},
+      "expected_answer": "Person A directly owns Company X and Clean Nominee LLC."
+    },
+    {
+      "id": "ubo",
+      "question": "Who is the ultimate beneficial owner of Company X?",
+      "gold_cypher": "MATCH path=(p:Person)-[:OWNS*1..5]->(c:Company {name:$company}) RETURN p.name AS ubo, [n IN nodes(path)|n.name] AS ownership_path LIMIT $limit",
+      "parameters": {"company": "Company X", "limit": 20},
+      "expected_answer": "Person A is an ultimate beneficial owner through the designed bounded shell chain."
+    },
+    {
+      "id": "cases-per-year",
+      "question": "How many court cases has Company X been involved in per year?",
+      "gold_cypher": "MATCH (c:Company {name:$company})-[:INVOLVED_IN]->(cc:CourtCase) RETURN cc.filed_year AS year, count(cc) AS cases ORDER BY year LIMIT $limit",
+      "parameters": {"company": "Company X", "limit": 50},
+      "expected_answer": "Company X has one seeded court case in each year from 2020 through 2023."
+    },
+    {
+      "id": "ownership-threshold",
+      "question": "Which people own more than 25% of any company directly or indirectly?",
+      "gold_cypher": "MATCH path=(p:Person)-[:OWNS*1..5]->(c:Company) WHERE any(r IN relationships(path) WHERE r.percent>$percent) RETURN DISTINCT p.name AS person, c.name AS company LIMIT $limit",
+      "parameters": {"percent": 25, "limit": 100},
+      "expected_answer": "Return people whose bounded ownership paths include an ownership interest above 25%."
+    },
+    {
+      "id": "sanctions-three-hops",
+      "question": "Does Company X have any connection within 3 hops to a sanctioned entity?",
+      "gold_cypher": "MATCH path=(c:Company {name:$company})-[*1..3]-(s:SanctionsEntry) RETURN s.entry_id AS entity, s.program AS sanctions_program, length(path) AS hops LIMIT $limit",
+      "parameters": {"company": "Company X", "limit": 50},
+      "expected_answer": "Yes. The fixture includes an active sanctions match reachable from Company X within the bound."
+    },
+    {
+      "id": "pep-directors",
+      "question": "Which directors of Company X are also PEPs?",
+      "gold_cypher": "MATCH (p:Person)-[:DIRECTOR_OF]->(c:Company {name:$company}) WHERE p.is_pep=$is_pep RETURN p.name AS director, p.role AS role LIMIT $limit",
+      "parameters": {"company": "Company X", "is_pep": true, "limit": 50},
+      "expected_answer": "Person A is both a director of Company X and a PEP."
+    },
+    {
+      "id": "news-co-mentions",
+      "question": "Show me all entities mentioned in the same news article as Company X.",
+      "gold_cypher": "MATCH (c:Company {name:$company})-[:MENTIONED_IN]->(a:NewsArticle)<-[:MENTIONED_IN]-(entity) RETURN a.headline AS article, entity.name AS entity LIMIT $limit",
+      "parameters": {"company": "Company X", "limit": 100},
+      "expected_answer": "Return entities in Company X's adverse-media co-mention cluster."
+    },
+    {
+      "id": "high-risk-jurisdiction",
+      "question": "List all companies registered in high-risk jurisdictions that are owned by Person A.",
+      "gold_cypher": "MATCH (p:Person {name:$person})-[:OWNS*1..5]->(c:Company)-[:REGISTERED_AT]->(a:Address)-[:SUBJECT_TO]->(j:Jurisdiction) WHERE j.risk_level=$risk RETURN DISTINCT c.name AS company, j.name AS jurisdiction LIMIT $limit",
+      "parameters": {"person": "Person A", "risk": "high", "limit": 100},
+      "expected_answer": "Company X and any shell-chain companies registered at high-risk addresses are returned."
+    },
+    {
+      "id": "risk-profile",
+      "question": "Summarize the risk profile of Company X.",
+      "gold_cypher": "MATCH (c:Company {name:$company}) OPTIONAL MATCH (c)-[:MATCHED_TO]->(s:SanctionsEntry) OPTIONAL MATCH (c)-[:INVOLVED_IN]->(cc:CourtCase) OPTIONAL MATCH (c)-[:MENTIONED_IN]->(a:NewsArticle) OPTIONAL MATCH (c)-[:REGISTERED_AT]->(:Address)-[:SUBJECT_TO]->(j:Jurisdiction) RETURN c.name AS company, count(DISTINCT s) AS sanctions_hits, count(DISTINCT cc) AS court_cases, count(DISTINCT a) AS news_hits, collect(DISTINCT j.risk_level) AS jurisdiction_risks LIMIT $limit",
+      "parameters": {"company": "Company X", "limit": 20},
+      "expected_answer": "Company X has sanctions, litigation, severe news, and high-risk-jurisdiction signals."
+    }
+  ]
+}

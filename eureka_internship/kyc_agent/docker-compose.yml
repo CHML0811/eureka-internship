@@ -1,0 +1,32 @@
+services:
+  neo4j:
+    image: neo4j:5-community
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD to a unique development password}"
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:?Set NEO4J_PASSWORD to a unique development password}"
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+      NEO4J_server_config_strict__validation_enabled: "true"
+      NEO4J_db_transaction_timeout: 5s
+      NEO4J_dbms_security_procedures_allowlist: "db.labels,db.relationshipTypes,db.schema.visualization"
+      NEO4J_dbms_security_procedures_unrestricted: ""
+    volumes:
+      - kyc-neo4j-data:/data
+      - ./schema.cypher:/seed/schema.cypher:ro
+      - ./seed.cypher:/seed/seed.cypher:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", "cypher-shell -u neo4j -p \"$${NEO4J_PASSWORD}\" 'RETURN 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  kyc-neo4j-data:

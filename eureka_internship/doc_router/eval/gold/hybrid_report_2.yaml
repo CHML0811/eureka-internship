@@ -1,0 +1,7 @@
+fixture: hybrid_report_2
+document_type: hybrid_report
+entities:
+  - {entity_id: e1, type: company, name: "Beacon Limited"}
+  - {entity_id: e2, type: person, name: "Lin Chen"}
+relationships:
+  - {relationship_id: r1, src: e2, dst: e1, kind: SHAREHOLDER_OF, weight: 40}

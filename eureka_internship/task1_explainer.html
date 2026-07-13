@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 7 — The Director's Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; line-height: 1.6; }
+
+  /* NAV TABS */
+  .tabs { display: flex; background: #1a1f2e; border-bottom: 2px solid #2d3748; position: sticky; top: 0; z-index: 100; }
+  .tab { padding: 14px 24px; cursor: pointer; color: #718096; font-size: 0.9rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+  .tab:hover { color: #e2e8f0; }
+  .tab.active { color: #63b3ed; border-bottom-color: #63b3ed; }
+
+  /* PAGES */
+  .page { display: none; max-width: 860px; margin: 0 auto; padding: 32px 24px 60px; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero { text-align: center; padding: 24px 0 36px; }
+  .hero h1 { font-size: 2rem; color: #63b3ed; }
+  .hero p { color: #a0aec0; margin-top: 8px; font-size: 1.05rem; }
+
+  /* CARDS */
+  .card { background: #1a2035; border: 2px solid #2d3748; border-radius: 14px; padding: 22px 26px; margin: 16px 0; }
+  .card.blue  { border-color: #2b4c7e; }
+  .card.green { border-color: #2d6a4f; }
+  .card.red   { border-color: #6b2737; }
+  .card.gold  { border-color: #7c5e10; }
+  .card h3 { font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .card p, .card li { color: #a0aec0; font-size: 0.9rem; }
+  .card ul { padding-left: 18px; }
+  .card li { margin: 5px 0; }
+
+  /* FLOW */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .flow-row { display: flex; align-items: stretch; gap: 12px; }
+  .flow-box { flex: 1; background: #1a2035; border: 2px solid #2d3748; border-radius: 12px; padding: 18px; }
+  .flow-box .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #4a5568; margin-bottom: 4px; }
+  .flow-box .title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .flow-box .desc { font-size: 0.85rem; color: #a0aec0; }
+  .flow-arrow { text-align: center; font-size: 1.6rem; color: #4a5568; padding: 4px 0; }
+
+  .side-note { background: #111827; border-left: 3px solid #4a5568; border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 0.82rem; color: #718096; }
+  .side-note strong { color: #90cdf4; }
+
+  /* QUESTION BOXES */
+  .q-box { background: #0d1117; border: 2px solid #2d6a4f; border-radius: 10px; padding: 14px 18px; margin: 10px 0; }
+  .q-box .q-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #2d6a4f; margin-bottom: 4px; font-weight: 700; }
+  .q-box .q-text { color: #e2e8f0; font-size: 0.95rem; }
+  .q-box .q-why { color: #718096; font-size: 0.82rem; margin-top: 6px; font-style: italic; }
+
+  /* RED FLAGS */
+  .flag { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0; }
+  .flag-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .flag-text strong { color: #fc8181; display: block; font-size: 0.9rem; }
+  .flag-text span { color: #a0aec0; font-size: 0.83rem; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* TAG */
+  .tag { display: inline-block; font-size: 0.72rem; padding: 3px 10px; border-radius: 12px; font-weight: 600; margin: 2px; }
+  .t-blue   { background: #1e3a5f; color: #63b3ed; }
+  .t-green  { background: #1a3a2a; color: #68d391; }
+  .t-red    { background: #3a1515; color: #fc8181; }
+  .t-purple { background: #2d1b4e; color: #b794f4; }
+  .t-gold   { background: #3a2e10; color: #fbd38d; }
+
+  /* CHECKLIST */
+  .check-item { display: flex; gap: 10px; margin: 8px 0; font-size: 0.88rem; align-items: flex-start; }
+  .check-icon { flex-shrink: 0; margin-top: 1px; }
+
+  h2 { font-size: 1.3rem; color: #90cdf4; margin: 28px 0 14px; }
+  code { background: #1a2035; color: #90cdf4; padding: 2px 7px; border-radius: 4px; font-size: 0.85em; }
+  .divider { border: none; border-top: 1px solid #2d3748; margin: 28px 0; }
+
+  /* ANALOGY BOX */
+  .analogy { background: #1a2035; border: 2px dashed #3182ce; border-radius: 12px; padding: 20px 24px; margin: 18px 0; }
+  .analogy .a-title { color: #63b3ed; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .analogy p { color: #cbd5e0; font-size: 0.92rem; }
+
+  /* CHECKPOINT */
+  .cp-q { background: #111827; border-left: 4px solid #fbd38d; border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 14px 0; }
+  .cp-q .num { color: #fbd38d; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+  .cp-q .question { color: #e2e8f0; font-size: 0.95rem; }
+  .cp-q .hint { color: #718096; font-size: 0.82rem; margin-top: 6px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('overview')">🗺️ Big Picture</div>
+  <div class="tab" onclick="show('schema')">🗂️ What Is the Schema</div>
+  <div class="tab" onclick="show('monitor')">👁️ How to Monitor AI</div>
+  <div class="tab" onclick="show('debug')">🔧 How to Debug</div>
+  <div class="tab" onclick="show('checkpoint')">🎯 Checkpoint</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ PAGE 1 -->
+<div class="page active" id="page-overview">
+  <div class="hero">
+    <h1>You Are the Director</h1>
+    <p>You don't write the code. You decide <em>what</em> to build, ask the right questions,<br>and catch it when AI goes wrong.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="a-title">🎬 The Film Director Analogy</div>
+    <p>A film director doesn't operate the camera. They know <strong>what the scene needs to accomplish</strong>, they tell the crew, and they watch the playback to say <em>"that's the one"</em> or <em>"do it again."</em> That's exactly your role here. I write the code. You make the calls that matter.</p>
+  </div>
+
+  <h2>What This Project Builds</h2>
+  <p style="color:#a0aec0; margin-bottom:16px;">One sentence: a smart document reader that figures out <em>what kind of document it's looking at</em>, sends it to the right tool, and returns clean data the graph database can use.</p>
+
+  <div class="flow">
+    <div class="flow-row">
+      <div class="flow-box" style="border-color:#2b4c7e">
+        <div class="label">Step 1</div>
+        <div class="title" style="color:#63b3ed">📥 Document comes in</div>
+        <div class="desc">Could be a passport scan, an org chart, an annual report — anything.</div>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row">
+      <div class="flow-box" style="border-color:#2d6a4f">
+        <div class="label">Step 2 — Classifier</div>
+        <div class="title" style="color:#68d391">🔍 What type is this?</div>
+        <div class="desc">Labels it: form, chart, hybrid report, ID document, or hand-drawn diagram.</div>
+        <div class="side-note">This is like the receptionist who decides which department handles your call.</div>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row">
+      <div class="flow-box" style="border-color:#553c7b">
+        <div class="label">Step 3 — Router</div>
+        <div class="title" style="color:#b794f4">🚦 Send to the right engine</div>
+        <div class="desc">
+          <span class="tag t-blue">Form / ID → AWS Textract</span>
+          <span class="tag t-purple">Chart / Diagram → Llama Vision (self-hosted)</span>
+          <span class="tag t-gold">Annual Report → Both</span>
+        </div>
+        <div class="side-note">Textract is great at reading tables and forms. A self-hosted Llama 3.2 Vision model understands images and diagrams — run locally so KYC document contents never leave Eureka's infrastructure. Neither alone handles everything.</div>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row">
+      <div class="flow-box" style="border-color:#7c5e10">
+        <div class="label">Step 4 — Normalizer</div>
+        <div class="title" style="color:#fbd38d">🔧 Convert to one shared format</div>
+        <div class="desc">Both engines speak different languages. The normalizer translates both into one standard JSON — the <strong>canonical schema</strong>.</div>
+        <div class="side-note"><strong>This is what Task 1 built.</strong> The schema. The "contract" every engine must follow.</div>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row">
+      <div class="flow-box" style="border-color:#2d6a4f">
+        <div class="label">Step 5 — Graph DB</div>
+        <div class="title" style="color:#68d391">🕸️ Neo4j ingests the data</div>
+        <div class="desc">Entities become nodes. Relationships become edges. Now you can ask: <em>"Who are the UBOs of this company?"</em></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>The 20% You Need to Own</h2>
+  <div class="two-col">
+    <div class="card green">
+      <h3>✅ Your job</h3>
+      <ul>
+        <li>Decide the architecture (we did this together)</li>
+        <li>Ask the right questions before each task</li>
+        <li>Review the output — does it make sense?</li>
+        <li>Catch when AI goes off-track</li>
+        <li>Write the memo the CEO reads</li>
+      </ul>
+    </div>
+    <div class="card blue">
+      <h3>🤖 AI's job</h3>
+      <ul>
+        <li>Write the actual Python code</li>
+        <li>Handle library syntax and boilerplate</li>
+        <li>Run and verify tests</li>
+        <li>Debug errors in the code</li>
+        <li>Follow the schema contract</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ PAGE 2 -->
+<div class="page" id="page-schema">
+  <div class="hero">
+    <h1>🗂️ What Is the Schema?</h1>
+    <p>The most important thing we built. Everything else depends on it.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="a-title">🔌 The Universal Plug Adapter Analogy</div>
+    <p>Imagine you're traveling across Asia. Your laptop charger doesn't fit every outlet. A <strong>universal adapter</strong> is the thing in the middle — your plug goes in one side, any country's outlet goes in the other. The schema is that adapter. <strong>Any engine goes in one side. The graph database always sees the same clean format on the other.</strong></p>
+  </div>
+
+  <h2>What the Schema Contains</h2>
+
+  <div class="card blue">
+    <h3>🧑 Entity — "a thing we found"</h3>
+    <p style="margin-bottom:10px">This becomes a <strong>node</strong> in Neo4j. Examples:</p>
+    <div class="check-item"><div class="check-icon">👤</div><div>A <strong>person</strong> — name, aliases (Chinese name too!), HKID or passport number</div></div>
+    <div class="check-item"><div class="check-icon">🏢</div><div>A <strong>company</strong> — name, company registration number</div></div>
+    <div class="check-item"><div class="check-icon">📍</div><div>An <strong>address</strong> — where someone or something is registered</div></div>
+    <div class="side-note">Each entity gets a <strong>confidence score</strong> — how sure was the engine? 0.99 = almost certain. 0.50 = a guess.</div>
+  </div>
+
+  <div class="card green">
+    <h3>🔗 Relationship — "a connection between things"</h3>
+    <p style="margin-bottom:10px">This becomes an <strong>edge</strong> in Neo4j. Examples:</p>
+    <div class="check-item"><div class="check-icon">👑</div><div><strong>UBO_OF</strong> — "Chan Tai Man owns 75% of Acme Holdings" → weight: 75.0</div></div>
+    <div class="check-item"><div class="check-icon">💼</div><div><strong>DIRECTOR_OF</strong> — person sits on the board</div></div>
+    <div class="check-item"><div class="check-icon">⚠️</div><div><strong>SANCTIONED_BY</strong> — entity is on OFAC / UN sanctions list</div></div>
+    <div class="side-note">The <strong>evidence_span</strong> field stores the exact sentence from the document that proves this link. A compliance officer needs this for their STR report.</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>📎 Source Metadata</h3>
+      <p>Where did this data come from? Which file, which page, when was it processed? This is your audit trail — regulators will ask.</p>
+    </div>
+    <div class="card gold">
+      <h3>🏷️ Provenance</h3>
+      <p>When <em>two engines both found the same entity</em>, provenance records which one "won" and why. Hybrid documents need this.</p>
+    </div>
+  </div>
+
+  <h2>Why Define the Schema FIRST?</h2>
+  <div class="card red">
+    <h3>❌ What happens if you don't</h3>
+    <p style="margin-bottom:10px">Textract returns: <code>"BlockType": "KEY_VALUE", "Text": "Chan Tai Man"</code><br>
+    VLM returns: <code>"entity": "person", "label": "Chan Tai Man"</code><br><br>
+    Now try merging them. <strong>They're completely different shapes.</strong> You'd need custom glue code for every pair of engines — and every time you add a new engine, you break everything.</p>
+  </div>
+  <div class="card green">
+    <h3>✅ With the schema defined first</h3>
+    <p>Both engines are required to produce an <code>Entity(name="Chan Tai Man", confidence=0.95)</code>. The merger doesn't need to know anything about either engine. It just compares confidence scores and picks the winner. <strong>Adding a new engine = just write a normalizer for it. Nothing else changes.</strong></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ PAGE 3 -->
+<div class="page" id="page-monitor">
+  <div class="hero">
+    <h1>👁️ How to Monitor AI</h1>
+    <p>You don't need to read every line of code. You need to know<br>the <em>right questions</em> to ask and the <em>right things to look at</em>.</p>
+  </div>
+
+  <h2>The 5 Questions to Ask Before Every Task</h2>
+
+  <div class="q-box">
+    <div class="q-label">Question 1 — Scope</div>
+    <div class="q-text">"What files are you creating or changing, and why?"</div>
+    <div class="q-why">If AI says it's touching 10 files for a simple task, that's a red flag. Simple tasks should touch few files.</div>
+  </div>
+
+  <div class="q-box">
+    <div class="q-label">Question 2 — Contract</div>
+    <div class="q-text">"What does this function take as input, and what does it return?"</div>
+    <div class="q-why">This is the one thing you must understand about any piece of code — its interface. You don't need to understand the internals.</div>
+  </div>
+
+  <div class="q-box">
+    <div class="q-label">Question 3 — Failure</div>
+    <div class="q-text">"What happens if this fails? How do I know it's broken?"</div>
+    <div class="q-why">Good code fails loudly and obviously. Bad code fails silently and gives you wrong answers with no warning.</div>
+  </div>
+
+  <div class="q-box">
+    <div class="q-label">Question 4 — Evidence</div>
+    <div class="q-text">"Show me the test or output that proves this works."</div>
+    <div class="q-why">AI can write code that looks right but is wrong. A working test run is the only proof that counts.</div>
+  </div>
+
+  <div class="q-box">
+    <div class="q-label">Question 5 — Secrets</div>
+    <div class="q-text">"Is any API key or credential hardcoded anywhere?"</div>
+    <div class="q-why">This is a career-ending mistake. Keys must always live in <code>.env</code> files only, never in code.</div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>What to Look At in the Output</h2>
+  <p style="color:#a0aec0; margin-bottom:16px;">After I run a task, here's your review checklist:</p>
+
+  <div class="card">
+    <h3>📁 File Review</h3>
+    <div class="check-item"><div class="check-icon">✅</div><div>Does the list of files match what we planned?</div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div>Are there any files you didn't expect?</div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div>Is there a <code>.env.example</code> (not <code>.env</code>) in the repo?</div></div>
+  </div>
+
+  <div class="card">
+    <h3>🧪 Test Output</h3>
+    <div class="check-item"><div class="check-icon">✅</div><div>Did the smoke test actually print output? (not just "no errors")</div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div>Does the output make real-world sense? (e.g. a person entity has a name, not a number)</div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div>Are confidence scores between 0.0 and 1.0? (not 99.1 — that's Textract's raw format, not ours)</div></div>
+  </div>
+
+  <div class="card green">
+    <h3>🗂️ Schema Compliance</h3>
+    <div class="check-item"><div class="check-icon">✅</div><div>Every entity has: <code>entity_id</code>, <code>type</code>, <code>name</code>, <code>confidence</code></div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div>Every relationship has: <code>src</code>, <code>dst</code>, <code>kind</code>, <code>confidence</code></div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div><code>engine_used</code> is set — tells you which engine produced this result</div></div>
+    <div class="check-item"><div class="check-icon">✅</div><div>Hybrid results have <code>provenance</code> entries</div></div>
+  </div>
+
+  <hr class="divider">
+  <h2>Red Flags to Watch For</h2>
+
+  <div class="flag">
+    <div class="flag-icon">🚩</div>
+    <div class="flag-text">
+      <strong>AI says "I'll handle that edge case later"</strong>
+      <span>Push back. "Later" means never. Edge cases in KYC are where data goes missing silently.</span>
+    </div>
+  </div>
+  <div class="flag">
+    <div class="flag-icon">🚩</div>
+    <div class="flag-text">
+      <strong>The output is valid JSON but the entities list is empty</strong>
+      <span>The code ran but extracted nothing. Something is wrong with the engine or the input parsing.</span>
+    </div>
+  </div>
+  <div class="flag">
+    <div class="flag-icon">🚩</div>
+    <div class="flag-text">
+      <strong>Confidence is always 1.0 on everything</strong>
+      <span>That means confidence isn't actually being calculated — it's just the default. Real extraction is never 100% confident.</span>
+    </div>
+  </div>
+  <div class="flag">
+    <div class="flag-icon">🚩</div>
+    <div class="flag-text">
+      <strong>No provenance on a hybrid document</strong>
+      <span>If both engines ran but provenance is empty, the merger isn't recording which engine produced what.</span>
+    </div>
+  </div>
+  <div class="flag">
+    <div class="flag-icon">🚩</div>
+    <div class="flag-text">
+      <strong>An API key appears in any <code>.py</code> file</strong>
+      <span>Stop immediately. This is a security issue. Keys belong only in <code>.env</code>.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ PAGE 4 -->
+<div class="page" id="page-debug">
+  <div class="hero">
+    <h1>🔧 How to Debug</h1>
+    <p>You don't need to fix the code yourself. You need to <em>describe the problem clearly</em><br>so AI can fix it fast.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="a-title">🏥 The Doctor Analogy</div>
+    <p>A doctor doesn't need to perform surgery to diagnose a problem. They ask the right questions, look at the right signals, and tell the surgeon exactly where to cut. <strong>Debugging is the same — your job is diagnosis, not surgery.</strong></p>
+  </div>
+
+  <h2>The 3-Step Debug Method</h2>
+
+  <div class="card blue">
+    <h3>Step 1 — What did you expect vs. what did you get?</h3>
+    <p>Example: <em>"I expected the entity list to have 2 entries. It has 0."</em><br>
+    Or: <em>"I expected confidence to be between 0 and 1. It's showing 99.1."</em><br><br>
+    This one sentence tells me everything I need to know to find the bug.</p>
+  </div>
+
+  <div class="card blue">
+    <h3>Step 2 — Where in the pipeline did it break?</h3>
+    <p>Use the 4-stage pipeline as your map:</p>
+    <div class="check-item" style="margin-top:8px"><div class="check-icon">🔍</div><div>Did the <strong>classifier</strong> return the wrong document type?</div></div>
+    <div class="check-item"><div class="check-icon">🚦</div><div>Did the <strong>router</strong> send it to the wrong engine?</div></div>
+    <div class="check-item"><div class="check-icon">⚙️</div><div>Did the <strong>engine</strong> return garbage or nothing?</div></div>
+    <div class="check-item"><div class="check-icon">🔧</div><div>Did the <strong>normalizer</strong> map the fields incorrectly?</div></div>
+    <p style="margin-top:10px; color:#718096; font-size:0.85rem">You don't need to read the code to answer this — just look at what each stage returns.</p>
+  </div>
+
+  <div class="card blue">
+    <h3>Step 3 — Give me the exact error message</h3>
+    <p>Copy the full error text — don't summarize it. Error messages are written for machines, and the exact wording matters. Paste it and say: <em>"Here's what I got, here's what I expected."</em></p>
+  </div>
+
+  <hr class="divider">
+  <h2>Good vs. Bad Bug Reports</h2>
+
+  <div class="two-col">
+    <div class="card red">
+      <h3>❌ Bad bug report</h3>
+      <p style="font-style:italic; color:#fc8181">"It's not working."</p>
+      <p style="margin-top:10px">This tells me nothing. I have to guess what "not working" means, which wastes time.</p>
+    </div>
+    <div class="card green">
+      <h3>✅ Good bug report</h3>
+      <p style="font-style:italic; color:#68d391">"I ran the smoke test. The ExtractionResult printed, but entities is an empty list. I gave it a form with two names visible. I expected at least 2 entity entries."</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h2>Questions to Ask Me at Each Task</h2>
+
+  <div class="q-box">
+    <div class="q-label">At the start of every task</div>
+    <div class="q-text">"Show me the plan before you write any code. What files, what functions, what inputs and outputs?"</div>
+  </div>
+  <div class="q-box">
+    <div class="q-label">After the code is written</div>
+    <div class="q-text">"Run the test and show me the actual output — not just 'it passed.'"</div>
+  </div>
+  <div class="q-box">
+    <div class="q-label">When results look wrong</div>
+    <div class="q-text">"The confidence is always 1.0. Is that real or is it the default? Show me where it's being calculated."</div>
+  </div>
+  <div class="q-box">
+    <div class="q-label">Before moving to next task</div>
+    <div class="q-text">"What assumptions did you make that I should know about? What could break later?"</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ PAGE 5 -->
+<div class="page" id="page-checkpoint">
+  <div class="hero">
+    <h1>🎯 Learning Checkpoint</h1>
+    <p>Answer these 4 questions in your own words.<br>Think "how would I explain this to the CEO?"</p>
+  </div>
+
+  <div class="analogy">
+    <div class="a-title">Why answer in your own words?</div>
+    <p>The founder is a 20-year banking veteran. In your first meeting with him, he will ask you to explain your system in plain English — not show him code. <strong>These questions are practice for that conversation.</strong></p>
+  </div>
+
+  <div class="cp-q">
+    <div class="num">Question 1 — The Schema</div>
+    <div class="question">Why did we define the data format (the "schema") before writing any of the actual extraction engines?</div>
+    <div class="hint">Hint: what would happen to the merger step if Textract and the Llama Vision engine returned data in completely different shapes?</div>
+  </div>
+
+  <div class="cp-q">
+    <div class="num">Question 2 — Two Confidence Scores</div>
+    <div class="question">The final result has one overall confidence score AND every single entity has its own confidence score. Why two levels? Give a real example where they'd be different numbers.</div>
+    <div class="hint">Hint: imagine a hybrid annual report where the table of shareholders was perfectly clear but the hand-drawn org chart was smudged.</div>
+  </div>
+
+  <div class="cp-q">
+    <div class="num">Question 3 — The Identifiers Dict</div>
+    <div class="question">Person entities store IDs as a flexible dictionary like <code>{"hkid": "A123456", "passport": "HK999"}</code> instead of fixed fields. Why is that a smarter design for a KYC company operating across Asia?</div>
+    <div class="hint">Hint: Hong Kong uses HKIDs. Singapore uses NRICs. Mainland China uses resident IDs. How many fixed fields would you need?</div>
+  </div>
+
+  <div class="cp-q">
+    <div class="num">Question 4 — Evidence Span</div>
+    <div class="question">Every relationship stores the raw sentence that proves it (the "evidence span"). As a compliance officer writing a Suspicious Transaction Report (STR), why would you specifically need this field?</div>
+    <div class="hint">Hint: a regulator asks you: "How do you know Chan Tai Man owns 75% of Acme Holdings?" What do you show them?</div>
+  </div>
+
+  <div class="card gold" style="margin-top:28px">
+    <h3>⏭️ After you answer these...</h3>
+    <p>We move to <strong>Task 2 — the Classifier</strong>. That's the piece that looks at a document and decides: is this a form, a chart, a hybrid report? It uses a two-stage trick (cheap heuristic first, self-hosted Llama Vision only if needed — see EUREKA_MASTER_CONTEXT §4 for why it's self-hosted, not a public API) that you'll want to understand before I build it.</p>
+  </div>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

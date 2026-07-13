@@ -1,0 +1,3 @@
+# Only needed when installing doc_router outside the repository environment.
+boto3>=1.34
+PyYAML>=6.0

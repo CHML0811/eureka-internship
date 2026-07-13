@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; connect-src 'self'; img-src data:">
+  <title>Eureka KYC Visualization Router</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    window.mermaid = mermaid;
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict" });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape@3/dist/cytoscape.min.js"></script>
+  <style>
+    :root { color-scheme: light; font-family: Inter, system-ui, sans-serif; color: #172033; }
+    body { margin: 0; background: #f4f7fb; }
+    main { max-width: 980px; margin: 36px auto; padding: 0 20px; }
+    h1 { margin-bottom: 6px; }
+    .note { color: #526078; margin-top: 0; }
+    .panel { background: white; border: 1px solid #dbe3ef; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px #26344d0d; }
+    label { display: block; font-weight: 650; margin: 12px 0 6px; }
+    input, textarea { width: 100%; box-sizing: border-box; padding: 11px; border: 1px solid #6b7a95; border-radius: 7px; font: inherit; }
+    textarea { min-height: 90px; resize: vertical; }
+    button { margin-top: 14px; padding: 10px 18px; color: white; background: #1857c9; border: 0; border-radius: 7px; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    #status { min-height: 24px; margin: 12px 0 0; color: #526078; }
+    .renderer { display: none; min-height: 420px; margin-top: 20px; background: white; border: 1px solid #dbe3ef; border-radius: 12px; padding: 20px; overflow: auto; }
+    #graph { padding: 0; height: 500px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>KYC Visualization Router</h1>
+    <p class="note">
+      Routing and the Python mock pipeline run locally. CDN UI requires network access.
+    </p>
+    <section class="panel">
+      <label for="question">Question</label>
+      <input id="question" value="Show court cases per year for Company X">
+      <label for="data">Optional data rows (JSON array)</label>
+      <textarea id="data" aria-describedby="status">[{"year":"2022","cases":2},{"year":"2023","cases":4},{"year":"2024","cases":3},{"year":"2025","cases":6}]</textarea>
+      <button id="run">Run</button>
+      <p id="status" role="status" aria-live="polite" aria-atomic="true">The Run button calls the local <code>/api/route</code> boundary.</p>
+    </section>
+    <div id="diagram" class="renderer" role="img" aria-label="Rendered structural diagram"></div>
+    <div id="chart" class="renderer" role="img" aria-label="Rendered data chart"></div>
+    <div id="graph" class="renderer" role="img" aria-label="Rendered KYC relationship graph"></div>
+  </main>
+  <script>
+    const runButton = document.querySelector("#run");
+    const status = document.querySelector("#status");
+    const renderers = [...document.querySelectorAll(".renderer")];
+
+    function show(id) {
+      renderers.forEach((element) => {
+        element.style.display = element.id === id ? "block" : "none";
+        if (element.id !== id) element.replaceChildren();
+      });
+    }
+
+    async function render(result) {
+      const args = result.arguments;
+      if (result.tool_name === "render_diagram") {
+        show("diagram");
+        const target = document.querySelector("#diagram");
+        target.className = "renderer mermaid";
+        target.textContent = args.mermaid_code;
+        await window.mermaid.run({ nodes: [target] });
+      } else if (result.tool_name === "render_chart") {
+        show("chart");
+        await vegaEmbed("#chart", args.vega_lite_spec, { actions: false });
+      } else if (result.tool_name === "render_graph") {
+        show("graph");
+        cytoscape({
+          container: document.querySelector("#graph"),
+          elements: [...args.nodes, ...args.edges],
+          layout: { name: "cose", animate: false },
+          style: [
+            { selector: "node", style: { "label": "data(label)", "background-color": "#3d75d6", "color": "#172033", "text-valign": "bottom", "text-margin-y": 8 } },
+            { selector: 'node[type = "person"]', style: { "background-color": "#d85b62", "shape": "ellipse" } },
+            { selector: 'node[type = "company"]', style: { "shape": "round-rectangle" } },
+            { selector: "edge", style: { "label": "data(label)", "curve-style": "bezier", "target-arrow-shape": "triangle", "line-color": "#8492a8", "target-arrow-color": "#8492a8", "font-size": 10 } }
+          ]
+        });
+      } else {
+        throw new Error(`Unknown renderer: ${result.tool_name}`);
+      }
+    }
+
+    runButton.addEventListener("click", async () => {
+      runButton.disabled = true;
+      status.textContent = "Routing locally…";
+      const dataInput = document.querySelector("#data");
+      dataInput.removeAttribute("aria-invalid");
+      try {
+        const text = dataInput.value.trim();
+        let data = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch (error) {
+          dataInput.setAttribute("aria-invalid", "true");
+          throw new Error(`Invalid JSON data: ${error.message}`);
+        }
+        const response = await fetch("/api/route", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: document.querySelector("#question").value, data })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+        await render(payload);
+        status.textContent = `${payload.tool_name} · ${payload.model} · ${payload.attempts} attempt(s)`;
+      } catch (error) {
+        status.textContent = `Error: ${error.message}`;
+      } finally {
+        runButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

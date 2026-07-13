@@ -1,0 +1,5 @@
+fixture: id_document_1
+document_type: id_document
+entities:
+  - {entity_id: e1, type: person, name: "Alex Lee"}
+relationships: []

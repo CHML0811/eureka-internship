@@ -1,0 +1,5 @@
+fixture: chart_like_2
+document_type: chart_like
+entities:
+  - {entity_id: e1, type: company, name: "Pacific Ventures"}
+relationships: []

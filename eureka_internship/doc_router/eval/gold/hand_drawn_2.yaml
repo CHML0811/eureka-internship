@@ -1,0 +1,7 @@
+fixture: hand_drawn_2
+document_type: hand_drawn
+entities:
+  - {entity_id: e1, type: person, name: "Taylor Ng"}
+  - {entity_id: e2, type: company, name: "Cedar Holdings"}
+relationships:
+  - {relationship_id: r1, src: e1, dst: e2, kind: SHAREHOLDER_OF, weight: 55}
